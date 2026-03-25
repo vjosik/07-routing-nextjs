@@ -9,11 +9,12 @@ export default function NotesByCategory() {
   const params = useParams();
   const slug = params.slug as string[];
   const tag = slug?.[0] === "all" ? undefined : slug?.[0];
-  const { data, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["notes", tag],
     queryFn: () => getNotes(tag),
   });
 
+  if (isLoading) return <div>Loading please wait...</div>;
   if (error) return <div>Error: {error.message}</div>;
   if (!data) return <div>No data</div>;
   return (
