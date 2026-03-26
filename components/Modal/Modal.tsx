@@ -1,6 +1,9 @@
+"use client";
+
 import { createPortal } from "react-dom";
 import css from "./Modal.module.css";
 import { useEffect } from "react";
+
 
 interface ModalProps {
   onClose: () => void;
@@ -8,6 +11,8 @@ interface ModalProps {
 }
 
 export default function Modal({ onClose, children }: ModalProps) {
+
+
   const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (event.target === event.currentTarget) {
       onClose();

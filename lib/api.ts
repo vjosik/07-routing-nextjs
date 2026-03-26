@@ -30,11 +30,9 @@ interface CreateNoteBody {
   tag: string;
 }
 
-
-
-export async function fetchNotes(params?: FetchNotesParams, tag?:string) {
+export async function fetchNotes(params?: FetchNotesParams, tag?: string) {
   const { data } = await apiClient.get<FetchNotesResponse>(ENDPOINT, {
-    params:{tag}
+    params,
   });
   return data;
 }
@@ -54,9 +52,4 @@ export async function deleteNote(id: Note["id"]) {
   return data;
 }
 
-export async function getNotes(tag?: string) {
-  const { data } = await apiClient.get<FetchNotesResponse>(ENDPOINT, {
-    params: { tag },
-  });
-  return data;
-}
+

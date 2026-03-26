@@ -1,30 +1,36 @@
-"use client";
+import { fetchNotes } from "@/lib/api";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
+import NotesClient from "./Notes.client";
+import { NoteTag } from "@/types/note";
 
-import NoteList from "@/components/NoteList/NoteList";
-import { getNotes } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
+type Props = {
+  params: Promise<{ slug: string[] }>;
+};
 
-export default function NotesByCategory() {
-  const params = useParams();
-  const slug = params.slug as string[];
-  const tag = slug?.[0] === "all" ? undefined : slug?.[0];
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["notes", tag],
-    queryFn: () => getNotes(tag),
+async function Notes({ params }: Props) {
+  const queryClient = new QueryClient();
+
+  const { slug } = await params;
+  const category = (slug[0] === "all" ? undefined : slug[0]) as
+    | NoteTag
+    | undefined;
+
+  await queryClient.prefetchQuery({
+    queryKey: ["fetchNotes", 1, "", category],
+    queryFn: () =>
+      fetchNotes({ page: 1, perPage: 12, search: "", tag: category }),
   });
-
-  if (isLoading) return <div>Loading please wait...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-  if (!data) return <div>No data</div>;
   return (
-    <div>
-      <h1>{tag ? `Notes: ${tag}` : "All"}</h1>
-      {data?.notes?.length > 0 ? (
-        <NoteList notes={data.notes} />
-      ) : (
-        <p>Notes do not found</p>
-      )}
-    </div>
+    <>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <NotesClient key={category ?? "all"} category={category} />
+      </HydrationBoundary>
+    </>
   );
 }
+
+export default Notes;

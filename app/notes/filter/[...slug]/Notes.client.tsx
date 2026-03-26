@@ -11,18 +11,25 @@ import NoteForm from "@/components/NoteForm/NoteForm";
 import NoteList from "@/components/NoteList/NoteList";
 import Pagination from "@/components/Pagination/Pagination";
 import SearchBox from "@/components/SearchBox/SearchBox";
+import { NoteTag } from "@/types/note";
 
-export default function NotesClient() {
+interface NotesClientProps {
+  category?: NoteTag;
+}
+
+export default function NotesClient({ category }: NotesClientProps) {
   const [page, setPage] = useState(1);
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
 
   const handlerOpenModal = () => setIsOpen(true);
-  const handlerCloseModal = () => setIsOpen(false);
+  const handlerCloseModal = () => {
+    setIsOpen(false);
+  };
 
   const { data, error, isError } = useQuery({
-    queryKey: ["fetchNotes", page, search],
-    queryFn: () => fetchNotes({ page, perPage: 12, search }),
+    queryKey: ["fetchNotes", page, search, category],
+    queryFn: () => fetchNotes({ page, perPage: 12, search, tag: category }),
     placeholderData: keepPreviousData,
     refetchOnMount: false,
   });
@@ -33,14 +40,13 @@ export default function NotesClient() {
     setSearch(value);
     setPage(1);
   }, 500);
-  
+
   const notes = data?.notes || [];
   const totalPages = data?.totalPages || 1;
 
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
-        
         <SearchBox onSearch={searchNote} value={search} />
         {totalPages > 1 && (
           <Pagination page={page} totalPages={totalPages} setPage={setPage} />
